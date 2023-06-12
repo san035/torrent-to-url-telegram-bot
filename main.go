@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/rs/zerolog/log"
-	"main.go/bot_tg"
 	"main.go/config"
+	"main.go/telegram"
 	"main.go/torrent_client"
 	"main.go/web_server"
 )
@@ -12,7 +12,7 @@ func main() {
 	listInitFunc := map[string]func() error{
 		"env":       config.Init,
 		"WebServer": web_server.Init,
-		"telegram":  bot_tg.Init,
+		"telegram":  telegram.Init,
 		"torrent":   torrent_client.Init,
 	}
 	for namePackage, initFunc := range listInitFunc {
@@ -23,8 +23,8 @@ func main() {
 		}
 	}
 
-	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Msg("Start bot https://t.me/" + bot_tg.Bot.Self.UserName)
-	bot_tg.Run()
+	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Msg("Start bot https://t.me/" + telegram.Bot.Self.UserName)
+	telegram.Listener()
 
 	torrent_client.Close()
 }

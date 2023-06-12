@@ -6,9 +6,9 @@
 ```
 BOT_TOKEN=you_token
 BOT_ABOUT=bot answer url to torrent content
-PORT=8080
-
-PATH_TORRENT_CONTENT=/temp/
+PORT= # default 8060
+PATH_TORRENT_CONTENT= # default `TORRENT_CONTENT/`
+TYPE_ANSWER= # file or url, default file
 ```
 
 ## build
