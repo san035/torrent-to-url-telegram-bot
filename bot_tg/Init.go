@@ -26,6 +26,7 @@ func Init() (err error) {
 	return nil
 }
 
+// Run обработка входящих сообщений телеграмма
 func Run() {
 	for update := range *updates {
 
@@ -41,13 +42,27 @@ func Run() {
 			continue
 		default:
 
-			url, err := torent_to_url.ServUrlByTorrent(&update.Message.Text)
+			chanStatus, err := torent_to_url.GetChanMessage(&update.Message.Text)
 			if err != nil {
 				Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, err.Error()))
 				continue
 			}
 
-			Bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, url))
+			go func(chatId int64) {
+				firstMessage, err := Bot.Send(tgbotapi.NewMessage(chatId, "Start"))
+				if err != nil {
+					log.Err(err).Int64("chatId", chatId).Msg("Error Bot.Send")
+					return
+				}
+
+				for text := range *chanStatus {
+					msg := tgbotapi.NewEditMessageText(chatId, firstMessage.MessageID, text)
+					if _, err = Bot.Send(msg); err != nil {
+						log.Err(err).Int64("chatId", chatId).Msg("Error Bot.Send")
+						return
+					}
+				}
+			}(update.Message.Chat.ID)
 
 		}
 
