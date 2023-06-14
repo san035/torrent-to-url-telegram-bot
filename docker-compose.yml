@@ -14,3 +14,15 @@ services:
       - ./:/app
     env_file:
       - .env
+    stop_grace_period: 10s
+    deploy:
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '0.02'
+          memory: 128M
+#       delay: 5s
+#       max_attempts: 5
+#       window: 120s
+

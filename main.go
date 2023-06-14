@@ -1,18 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"main.go/internal/telegram"
 	"main.go/internal/torrent_client"
 	"main.go/internal/web_server"
 	"main.go/pkg/config"
 	"main.go/pkg/osutils"
+	"runtime"
 )
 
 func main() {
-	osutils.CallFuncByInterrupt(func() {
-		telegram.SendMessageAdmin("Close app host " + *web_server.HostAndPort)
-	})
+	defer funcEnd()
+	osutils.CallFuncByInterrupt(funcEnd)
 
 	listInitFunc := map[string]func() error{
 		"env":       config.Init,
@@ -20,6 +21,8 @@ func main() {
 		"telegram":  telegram.Init,
 		"torrent":   torrent_client.Init,
 	}
+	defer torrent_client.Close()
+
 	for namePackage, initFunc := range listInitFunc {
 		err := initFunc()
 		if err != nil {
@@ -31,5 +34,20 @@ func main() {
 	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Msg("Start bot https://t.me/" + telegram.Bot.Self.UserName)
 	telegram.Listener()
 
-	torrent_client.Close()
+}
+
+func funcEnd() {
+	totalText := "Close app host " + *web_server.HostAndPort
+	r := recover()
+	textRecover := fmt.Sprint("Recovered:", r)
+	if r != nil {
+		totalText += "\n" + textRecover
+		totalText += fmt.Sprintf("\nPanic occurred at")
+		for i := 0; i < 6; i++ {
+			_, file, line, _ := runtime.Caller(i)
+			totalText += fmt.Sprintf("\n %s:%d", file, line)
+		}
+	}
+	log.Info().Str("recover", textRecover).Msg("Close app")
+	telegram.SendMessageAdmin(totalText)
 }
