@@ -2,14 +2,18 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/rs/zerolog/log"
+	"main.go/internal/web_server"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var (
-	Bot       *tgbotapi.BotAPI
-	updates   *tgbotapi.UpdatesChannel
-	textAbout string
+	Bot            *tgbotapi.BotAPI
+	updates        *tgbotapi.UpdatesChannel
+	textAbout      string
+	adminUsersList []int64
 )
 
 func GetInlineButton(NameButton string, data int) *tgbotapi.InlineKeyboardMarkup {
@@ -38,5 +42,16 @@ func Init() (err error) {
 	updates = &updates1
 
 	textAbout = os.Getenv("BOT_ABOUT")
+
+	envList := strings.Split(os.Getenv("LIST_ADMIN_ID_TELEGRAM"), ",")
+	for _, id := range envList {
+		i, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			log.Error().Err(err).Str("id", id).Msg("Load env LIST_ADMIN_ID_TELEGRAM-")
+			continue
+		}
+		adminUsersList = append(adminUsersList, i)
+	}
+	SendMessageAdmin("Start host: " + *web_server.HostAndPort)
 	return nil
 }

@@ -6,9 +6,14 @@ import (
 	"main.go/internal/torrent_client"
 	"main.go/internal/web_server"
 	"main.go/pkg/config"
+	"main.go/pkg/osutils"
 )
 
 func main() {
+	osutils.CallFuncByInterrupt(func() {
+		telegram.SendMessageAdmin("Close app host " + *web_server.HostAndPort)
+	})
+
 	listInitFunc := map[string]func() error{
 		"env":       config.Init,
 		"WebServer": web_server.Init,

@@ -20,7 +20,7 @@ HOST=
 PATH_TORRENT_CONTENT= 
 
 # list id telegrem by "," 
-LIST_ADMIN_ID=
+LIST_ADMIN_ID_TELEGRAM=
 
 TYPE_ANSWER= # file or url, default file
 ```

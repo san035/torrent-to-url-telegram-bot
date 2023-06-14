@@ -12,7 +12,7 @@ const (
 )
 
 var (
-	hostAndPort *string = new(string)
+	HostAndPort *string = new(string)
 )
 
 func Init() error {
@@ -22,11 +22,11 @@ func Init() error {
 		port = PortDefault // default port
 	}
 
-	*hostAndPort = os.Getenv("HOST")
-	if *hostAndPort == "" {
-		*hostAndPort = HostDefault // default port
+	*HostAndPort = os.Getenv("HOST")
+	if *HostAndPort == "" {
+		*HostAndPort = HostDefault // default port
 	}
-	*hostAndPort += `:` + port + `/`
+	*HostAndPort += `:` + port + `/`
 
 	http.HandleFunc(`/`, staticHandler)
 
