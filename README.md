@@ -4,11 +4,24 @@
 
 ## .env
 ```
+# required parameters
 BOT_TOKEN=you_token
-BOT_ABOUT=bot answer url to torrent content
-PORT= # default 8060
-HOST= # default http://127.0.0.1
-PATH_TORRENT_CONTENT= # default `TORRENT_CONTENT/`
+PORT=8060
+
+# optional parameters
+
+#default "bot answer url to torrent content"
+BOT_ABOUT=
+
+# default http://127.0.0.1
+HOST= 
+
+# default `TORRENT_CONTENT/`
+PATH_TORRENT_CONTENT= 
+
+# list id telegrem by "," 
+LIST_ADMIN_ID=
+
 TYPE_ANSWER= # file or url, default file
 ```
 
@@ -16,6 +29,6 @@ TYPE_ANSWER= # file or url, default file
 ```
 git clone git@github.com:san035/torrent-to-url-telegram-bot.git
 cd torrent-to-url-telegram-bot
-nano .env
-go build
+# edit .env
+up.sh
 ```
