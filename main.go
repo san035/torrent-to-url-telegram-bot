@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/rs/zerolog/log"
-	"main.go/config"
-	"main.go/telegram"
-	"main.go/torrent_client"
-	"main.go/web_server"
+	"main.go/internal/telegram"
+	"main.go/internal/torrent_client"
+	"main.go/internal/web_server"
+	"main.go/pkg/config"
 )
 
 func main() {

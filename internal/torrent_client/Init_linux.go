@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 )
 
-var client *torrent.Client
-var PathTorrentContent string
+var (
+	client             *torrent.Client
+	PathTorrentContent string
+)
 
 func Init() (err error) {
 	PathTorrentContent = os.Getenv("PATH_TORRENT_CONTENT")
