@@ -7,11 +7,7 @@ import (
 )
 
 // Send, text - string or *string
-func Send(chatId int64, text interface{}, button *tgbotapi.InlineKeyboardMarkup) (mes tgbotapi.Message, err error) {
-	if Bot == nil {
-		return
-	}
-
+func Send(Bot *tgbotapi.BotAPI, chatId int64, text interface{}, button *tgbotapi.InlineKeyboardMarkup) (mes tgbotapi.Message, err error) {
 	var textSend string
 
 	switch text.(type) {
@@ -36,7 +32,7 @@ func Send(chatId int64, text interface{}, button *tgbotapi.InlineKeyboardMarkup)
 // SendMessageAdmin Отправка админам
 func SendMessageAdmin(text interface{}) {
 	for _, chatIdAdmin := range adminUsersList {
-		_, err := Send(chatIdAdmin, text, nil)
+		_, err := Send(listBot[0], chatIdAdmin, text, nil)
 		if err != nil {
 			log.Error().Err(err).Interface("text", text).Msg("telegram.SendMessageAdmin-")
 			break

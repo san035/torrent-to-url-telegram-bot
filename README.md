@@ -5,7 +5,9 @@
 ## .env
 ```
 # required parameters
-BOT_TOKEN=you_token
+
+# LIST_BOT_TOKEN split ','
+LIST_BOT_TOKEN=
 PORT=8060
 
 # optional parameters
@@ -20,6 +22,7 @@ HOST=
 PATH_TORRENT_CONTENT= 
 
 # list id telegrem by "," 
+# all admins must be first in list LIST_BOT_TOKEN
 LIST_ADMIN_ID_TELEGRAM=
 
 TYPE_ANSWER= # file or url, default file

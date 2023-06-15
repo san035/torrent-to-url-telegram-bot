@@ -31,9 +31,8 @@ func main() {
 		}
 	}
 
-	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Msg("Start bot https://t.me/" + telegram.Bot.Self.UserName)
+	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
 	telegram.Listener()
-
 }
 
 func funcEnd() {
