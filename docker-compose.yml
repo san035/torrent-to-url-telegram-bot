@@ -3,9 +3,10 @@ services:
   t_app:
     container_name: t_app
     restart: always
-    image: golang:1.20
+    image: alpine:3.18.0
     working_dir: /app
     command: /app/up.sh
+#    command: ["sh", "-c", "tail -f /dev/null"]
     stdin_open: true
     tty: true
     ports:
@@ -14,14 +15,14 @@ services:
       - ./:/app
     env_file:
       - .env
-    stop_grace_period: 10s
+    stop_grace_period: 15s
     deploy:
       restart_policy:
         condition: on-failure
       resources:
         limits:
-          cpus: '0.02'
-          memory: 128M
+          cpus: '0.05'
+          memory: 200M
 #       delay: 5s
 #       max_attempts: 5
 #       window: 120s

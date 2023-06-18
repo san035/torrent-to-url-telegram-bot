@@ -23,9 +23,10 @@ func GetListNameBot() []string {
 	return listNameBot
 }
 
-func GetInlineButton(NameButton string, data int) *tgbotapi.InlineKeyboardMarkup {
-	// Создаем Callback кнопку "Cancel"
-	inlineBtn := tgbotapi.NewInlineKeyboardButtonData(NameButton, strconv.Itoa(data))
+// GetInlineButton Создаем Callback кнопку c именем NameButton и данными: *NameButton + "_"+*data
+func GetInlineButton(NameButton, data *string) *tgbotapi.InlineKeyboardMarkup {
+	dataB := *NameButton + "_" + *data
+	inlineBtn := tgbotapi.NewInlineKeyboardButtonData(*NameButton, dataB)
 	// Создаем массив кнопок и добавляем в него Callback кнопку
 	buttons := []tgbotapi.InlineKeyboardButton{inlineBtn}
 
