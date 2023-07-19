@@ -55,7 +55,6 @@ object Build : BuildType({
     params {
         param("env.GOOS", "linux")
         param("env.GOARCH", "386")
-        param("system.build.date", "system.build.date")
     }
 
     vcs {
