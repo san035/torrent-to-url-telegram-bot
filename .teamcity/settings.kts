@@ -45,7 +45,10 @@ project {
 object Build : BuildType({
     name = "Build"
 
-    artifactRules = "t_app => t_app.zip"
+    artifactRules = """
+        t_app => t_app.zip
+        README.md => t_app.zip
+    """.trimIndent()
     publishArtifacts = PublishMode.SUCCESSFUL
 
     params {
