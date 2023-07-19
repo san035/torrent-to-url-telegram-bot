@@ -45,6 +45,7 @@ project {
 object Build : BuildType({
     name = "Build"
 
+    artifactRules = "t_app => t_app.zip"
     publishArtifacts = PublishMode.SUCCESSFUL
 
     params {
