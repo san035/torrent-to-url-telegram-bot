@@ -1,7 +1,9 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.golang
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
+import jetbrains.buildServer.configs.kotlin.buildSteps.SSHUpload
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
+import jetbrains.buildServer.configs.kotlin.buildSteps.sshUpload
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubConnection
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
@@ -66,6 +68,16 @@ object Build : BuildType({
         script {
             name = "build go project"
             scriptContent = "go build -o t_app main.go"
+        }
+        sshUpload {
+            name = "depoly"
+            transportProtocol = SSHUpload.TransportProtocol.SCP
+            sourcePath = "*.zip"
+            targetUrl = "bpm.dev.itkn.ru:/home/askorohodov/project/torrent-to-url-telegram-bot"
+            authMethod = defaultPrivateKey {
+                username = "askorohodov"
+                passphrase = "credentialsJSON:e93b13a6-1431-41a3-92df-3b065124466c"
+            }
         }
     }
 
