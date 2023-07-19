@@ -71,7 +71,7 @@ object Build : BuildType({
         sshUpload {
             name = "depoly"
             transportProtocol = SSHUpload.TransportProtocol.SCP
-            sourcePath = "*.zip"
+            sourcePath = "+:**/*"
             targetUrl = "bpm.dev.itkn.ru:/home/askorohodov/project/torrent-to-url-telegram-bot"
             authMethod = password {
                 username = "askorohodov"
