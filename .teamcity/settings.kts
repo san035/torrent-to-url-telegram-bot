@@ -72,14 +72,4 @@ object Build : BuildType({
         perfmon {
         }
     }
-
-    dependencies {
-        artifacts(RelativeId("Build")) {
-            buildRule = lastSuccessful()
-            artifactRules = """
-                t_app => artifacts.zip
-                README.md => artifacts.zip
-            """.trimIndent()
-        }
-    }
 })
