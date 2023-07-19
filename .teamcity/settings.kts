@@ -45,6 +45,8 @@ project {
 object Build : BuildType({
     name = "Build"
 
+    publishArtifacts = PublishMode.SUCCESSFUL
+
     params {
         param("env.GOOS", "linux")
         param("env.GOARCH", "386")
