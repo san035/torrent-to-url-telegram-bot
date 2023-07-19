@@ -73,9 +73,9 @@ object Build : BuildType({
             transportProtocol = SSHUpload.TransportProtocol.SCP
             sourcePath = "*.zip"
             targetUrl = "bpm.dev.itkn.ru:/home/askorohodov/project/torrent-to-url-telegram-bot"
-            authMethod = defaultPrivateKey {
+            authMethod = password {
                 username = "askorohodov"
-                passphrase = "credentialsJSON:e93b13a6-1431-41a3-92df-3b065124466c"
+                password = "credentialsJSON:e93b13a6-1431-41a3-92df-3b065124466c"
             }
         }
     }
