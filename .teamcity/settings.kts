@@ -56,6 +56,7 @@ object Build : BuildType({
 
     params {
         param("env.GOOS", "linux")
+        param("APP_NAME", "t_app")
         param("env.GOARCH", "386")
     }
 
