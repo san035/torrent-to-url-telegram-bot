@@ -45,8 +45,6 @@ project {
 object Build : BuildType({
     name = "Build"
 
-    artifactRules = "README.md => README.zip"
-
     params {
         param("env.GOOS", "linux")
         param("env.GOARCH", "386")
