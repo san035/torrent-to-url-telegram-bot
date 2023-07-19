@@ -47,8 +47,8 @@ object Build : BuildType({
     description = "Создание исполняемого файла"
 
     artifactRules = """
-        t_app => t_app_%system.build.date%_%build.counter%.zip
-        README.md => t_app_%system.build.date%_%build.counter%.zip
+        t_app => t_app_%build.counter%.zip
+        README.md => t_app_%build.counter%.zip
     """.trimIndent()
     publishArtifacts = PublishMode.SUCCESSFUL
 
