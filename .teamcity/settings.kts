@@ -43,11 +43,12 @@ project {
 }
 
 object Build : BuildType({
-    name = "Build"
+    name = "Build app"
+    description = "Создание исполняемого файла"
 
     artifactRules = """
-        t_app => t_app.zip
-        README.md => t_app.zip
+        t_app => t_app_%build.counter%.zip
+        README.md => t_app_%build.counter%.zip
     """.trimIndent()
     publishArtifacts = PublishMode.SUCCESSFUL
 
