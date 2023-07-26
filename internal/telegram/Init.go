@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+type cmdTg struct {
+	IsAdmin     bool
+	Description string
+	DoFunc      func(*tgbotapi.BotAPI, int64)
+}
+
+type mapCmd map[string]cmdTg
+
 var (
 	listBot []*tgbotapi.BotAPI
 	//updates        *tgbotapi.UpdatesChannel
@@ -17,6 +25,14 @@ var (
 	adminUsersList []int64
 	err            error
 	listNameBot    []string
+
+	MapCmd = mapCmd{
+		"info":          {IsAdmin: true, DoFunc: info},
+		"down":          {IsAdmin: true, DoFunc: down},
+		"start":         {IsAdmin: false, DoFunc: start},
+		"clear_content": {IsAdmin: true, DoFunc: clearContent},
+		// create_cmd - ниже
+	}
 )
 
 func GetListNameBot() []string {
@@ -62,6 +78,8 @@ func init() {
 	}
 
 	textAbout = os.Getenv("BOT_ABOUT")
+
+	MapCmd["create_cmd"] = cmdTg{IsAdmin: true, DoFunc: creatCmd, Description: "Создать список команд для @BotFather"}
 
 	return
 }

@@ -17,7 +17,7 @@ var (
 func Init() (err error) {
 	PathTorrentContent = os.Getenv("PATH_TORRENT_CONTENT")
 	if PathTorrentContent == `` {
-		PathTorrentContent = filepath.Dir(os.Args[0]) + `TORRENT_CONTENT` + string(os.PathSeparator)
+		PathTorrentContent = filepath.Dir(os.Args[0]) + `/TORRENT_CONTENT` + string(os.PathSeparator)
 	}
 
 	err = os.MkdirAll(PathTorrentContent, 0755)
@@ -39,4 +39,8 @@ func Close() {
 	if client != nil {
 		client.Close()
 	}
+}
+
+func GetPathTorrentContent() string {
+	return PathTorrentContent
 }

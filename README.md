@@ -21,7 +21,7 @@ HOST=
 # default `TORRENT_CONTENT/`
 PATH_TORRENT_CONTENT= 
 
-# list id telegrem by "," 
+# list id telegrem separat by "," 
 # all admins must be first in list LIST_BOT_TOKEN
 LIST_ADMIN_ID_TELEGRAM=
 

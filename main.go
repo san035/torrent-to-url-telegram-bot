@@ -37,6 +37,7 @@ func main() {
 		"\n bots: " + fmt.Sprint(telegram.GetListNameBot()))
 
 	telegram.Listener()
+	log.Info().Msg("End.")
 }
 
 func funcEnd() {

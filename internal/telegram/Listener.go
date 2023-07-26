@@ -6,10 +6,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"main.go/internal/torrent_client"
 	"main.go/pkg/list_context"
-	"main.go/pkg/osutils"
+	"strconv"
 )
 
-var listContext = list_context.NewListContext()
+var (
+	listContext = list_context.NewListContext()
+)
 
 // Listener обработка входящих сообщений телеграмма
 func Listener() {
@@ -39,31 +41,30 @@ func ListenerOneBot(bot *tgbotapi.BotAPI) {
 			continue
 		}
 
-		cmd := update.Message.Command()
-		log.Info().Int("id", update.UpdateID).Msg("cmd:" + cmd)
-		switch cmd {
-		case "info":
-			if contains(&adminUsersList, update.Message.Chat.ID) {
-				_, _ = Send(bot, update.Message.Chat.ID, osutils.InfoHost(), nil)
+		textCmd := update.Message.Command()
+		log.Info().Int("id", update.UpdateID).Msg("cmd:" + textCmd)
+
+		cmd, ok := MapCmd[textCmd]
+		if ok {
+			// Проверка на админа
+			if cmd.IsAdmin && !contains(&adminUsersList, update.Message.Chat.ID) {
+				_, _ = Send(bot, update.Message.Chat.ID, "You are not admin, "+strconv.FormatInt(update.Message.Chat.ID, 10), nil)
 				continue
 			}
-			fallthrough
-		case "about":
-			fallthrough
-		case "start":
-			_, _ = Send(bot, update.Message.Chat.ID, &textAbout, nil)
+
+			cmd.DoFunc(bot, update.Message.Chat.ID)
 			continue
-		default:
-
-			err := torrent_client.CheckUrl(&update.Message.Text)
-			if err != nil {
-				log.Error().Err(err).Int64("chatId", update.Message.Chat.ID).Msg(`bot.Send`)
-				_, _ = Send(bot, update.Message.Chat.ID, err, nil)
-				continue
-			}
-
-			go serveTorrent(bot, update.Message.Chat.ID, &update.Message.Text)
 		}
+
+		// в сообщении ссылка на торрент
+		err := torrent_client.CheckUrl(&update.Message.Text)
+		if err != nil {
+			log.Error().Err(err).Int64("chatId", update.Message.Chat.ID).Msg(`bot.Send`)
+			_, _ = Send(bot, update.Message.Chat.ID, err, nil)
+			continue
+		}
+
+		go serveTorrent(bot, update.Message.Chat.ID, &update.Message.Text)
 
 	}
 

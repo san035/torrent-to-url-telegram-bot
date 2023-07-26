@@ -27,7 +27,7 @@ func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, magnetUrl *string) {
 		return
 	}
 
-	dataMsg := strconv.FormatUint(idContext, 64)
+	dataMsg := strconv.FormatUint(idContext, 10)
 	mapButton := map[int]*tgbotapi.InlineKeyboardMarkup{
 		torrent_client.StatusTorrentStart: GetInlineButton(&buttonCansel, &dataMsg),
 		torrent_client.StatusTorrentRun:   GetInlineButton(&buttonCansel, &dataMsg),
