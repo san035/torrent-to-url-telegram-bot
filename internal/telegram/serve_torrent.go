@@ -35,7 +35,7 @@ func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, magnetUrl *string) {
 		torrent_client.StatusTorrentEnd:   GetInlineButton(&buttonDelete, &dataMsg),
 	}
 
-	chanStatus, err := torrent_client.GetChanMessage(&ctx, magnetUrl)
+	chanStatus, err := torrent_client.DefaultClient.StartTorrent(&ctx, magnetUrl)
 	if err != nil {
 		_, _ = Send(bot, chatId, err, mapButton[torrent_client.StatusTorrentEnd])
 		cancel()

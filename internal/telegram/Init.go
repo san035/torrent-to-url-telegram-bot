@@ -70,7 +70,7 @@ func init() {
 			log.Error().Err(err2).Str("token", token).Msg("bad token")
 		}
 		listBot = append(listBot, bot)
-		listNameBot = append(listNameBot, bot.Self.String())
+		listNameBot = append(listNameBot, "@"+bot.Self.String())
 	}
 	if len(listBot) == 0 {
 		err = errors.New("Not work token in env:LIST_BOT_TOKEN")

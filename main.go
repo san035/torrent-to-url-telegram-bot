@@ -5,33 +5,46 @@ import (
 	"github.com/rs/zerolog/log"
 	"main.go/internal/telegram"
 	"main.go/internal/torrent_client"
+	"main.go/internal/torrent_client/torrent_anacrolix"
+	"main.go/internal/torrent_client/torrent_mock"
 	"main.go/internal/web_server"
 	"main.go/pkg/config"
 	"main.go/pkg/osutils"
 	"runtime"
 )
 
+type InitPackage struct {
+	Name     string
+	InitFunc func() error
+}
+
 func main() {
 	defer funcEnd()
 	osutils.CallFuncByInterrupt(funcEnd)
 
-	listInitFunc := map[string]func() error{
-		"env":       config.Init,
-		"WebServer": web_server.Init,
-		"telegram":  telegram.Init,
-		"torrent":   torrent_client.Init,
+	listInitFunc := []InitPackage{
+		{"env", config.Init},
+		{"telegram", telegram.Init},
+		{"torrent_client", torrent_client.Init},
 	}
-	defer torrent_client.Close()
 
-	for namePackage, initFunc := range listInitFunc {
-		err := initFunc()
+	if runtime.GOOS == "windows" {
+		listInitFunc = append(listInitFunc, InitPackage{"torrent_mock", torrent_mock.Init})
+	} else {
+		listInitFunc = append(listInitFunc, InitPackage{"WebServer", web_server.Init})
+		listInitFunc = append(listInitFunc, InitPackage{"torrent_anacrolix", torrent_anacrolix.Init})
+	}
+
+	for _, initFunc := range listInitFunc {
+		err := initFunc.InitFunc()
 		if err != nil {
-			log.Fatal().Err(err).Msg(namePackage)
+			log.Fatal().Err(err).Msg(initFunc.Name)
 			return
 		}
 	}
+	defer torrent_client.DefaultClient.Close()
 
-	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
+	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.GetPathTorrentContent()).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
 
 	telegram.SendMessageAdmin("Start bots \n" + telegram.GetInfo())
 

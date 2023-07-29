@@ -26,6 +26,9 @@ PATH_TORRENT_CONTENT=
 LIST_ADMIN_ID_TELEGRAM=
 
 TYPE_ANSWER= # file or url, default file
+
+# тип торрент клиента MOCK или ANACROLIX, для windows только MOCK
+TORRENT_CLIENT=MOCK
 ```
 
 ## build

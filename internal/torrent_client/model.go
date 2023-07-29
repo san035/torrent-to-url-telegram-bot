@@ -1,16 +1,25 @@
-//go:build linux
-
 package torrent_client
 
 import (
-	"github.com/anacrolix/torrent"
-	"github.com/rs/zerolog/log"
+	"context"
 	"os"
 	"path/filepath"
 )
 
+type TorrentClient interface {
+	StartTorrent(ctx *context.Context, urlMagnet *string) (chanStatus *chan StatusTorrent, err error)
+	Close()
+}
+
+const (
+	StatusTorrentStart = iota
+	StatusTorrentRun   = iota
+	StatusTorrentPause = iota
+	StatusTorrentEnd   = iota
+)
+
 var (
-	client             *torrent.Client
+	DefaultClient      TorrentClient
 	PathTorrentContent string
 )
 
@@ -24,23 +33,15 @@ func Init() (err error) {
 	if err != nil {
 		return
 	}
-
-	clientConfig := torrent.NewDefaultClientConfig()
-	clientConfig.DataDir = PathTorrentContent
-	client, err = torrent.NewClient(clientConfig)
-	if err != nil {
-		return
-	}
-	log.Info().Str("path", PathTorrentContent).Msg("Start torrent client")
 	return
-}
-
-func Close() {
-	if client != nil {
-		client.Close()
-	}
 }
 
 func GetPathTorrentContent() string {
 	return PathTorrentContent
+}
+
+type StatusTorrent struct {
+	Info        string
+	WebFileName *string
+	Status      int
 }

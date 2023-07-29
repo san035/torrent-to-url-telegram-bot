@@ -14,9 +14,9 @@ type DataContext struct {
 const MaxCountContext = 100
 
 type ListContext struct {
+	Mutex    sync.Mutex
 	List     *[MaxCountContext]*DataContext
 	LastItem int
-	Mutex    sync.Mutex
 }
 
 var lastId uint64
