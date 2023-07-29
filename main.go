@@ -33,8 +33,7 @@ func main() {
 
 	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.PathTorrentContent).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
 
-	telegram.SendMessageAdmin("Start bots \n" + osutils.InfoHost() +
-		"\n bots: " + fmt.Sprint(telegram.GetListNameBot()))
+	telegram.SendMessageAdmin("Start bots \n" + telegram.GetInfo())
 
 	telegram.Listener()
 	log.Info().Msg("End.")
