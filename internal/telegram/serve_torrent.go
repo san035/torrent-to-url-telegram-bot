@@ -57,6 +57,8 @@ func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, magnetUrl *string) {
 			textMsg += web_server.GetUrl(status.WebFileName)
 		}
 
+		log.Debug().Str("bot", bot.Self.String()).Str("user", NikNameById(chatId)).Str("text", textMsg).Msg("Сообщение от торрента")
+
 		msg := tgbotapi.NewEditMessageText(chatId, firstMessage.MessageID, textMsg)
 		msg.BaseEdit.ReplyMarkup = mapButton[status.Status]
 		if _, err = bot.Send(msg); err != nil {

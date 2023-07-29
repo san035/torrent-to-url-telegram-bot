@@ -31,6 +31,8 @@ func ListenerOneBot(bot *tgbotapi.BotAPI) {
 
 	for update := range updates {
 
+		SaveUser(update.Message.Chat)
+
 		if update.CallbackQuery != nil {
 			runCallBack(bot, &update)
 			return

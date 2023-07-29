@@ -31,6 +31,7 @@ var (
 		"down":          {IsAdmin: true, DoFunc: down},
 		"start":         {IsAdmin: false, DoFunc: start},
 		"clear_content": {IsAdmin: true, DoFunc: clearContent},
+		"show_content":  {IsAdmin: true, DoFunc: showContent},
 		// create_cmd - ниже
 	}
 )

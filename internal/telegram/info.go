@@ -22,7 +22,7 @@ func GetInfo() string {
 	if err != nil {
 		log.Error().Err(err).Msg("telegram.GetInfo.FolderSize-")
 	}
-	textInfo += fmt.Sprintf("%d Mb /clear_content\n bots: %s\nOS: %s", size/1024/1024, fmt.Sprint(GetListNameBot()), runtime.GOOS)
+	textInfo += fmt.Sprintf("%d Mb /clear_content /show_content\n bots: %s\nOS: %s", size/1024/1024, fmt.Sprint(GetListNameBot()), runtime.GOOS)
 
 	return textInfo
 }

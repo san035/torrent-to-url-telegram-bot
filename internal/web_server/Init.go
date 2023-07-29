@@ -11,9 +11,7 @@ const (
 	PortDefault = "http://127.0.0.1"
 )
 
-var (
-	HostAndPort *string = new(string)
-)
+var HostAndPort *string = new(string)
 
 func Init() error {
 
