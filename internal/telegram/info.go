@@ -4,8 +4,8 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog/log"
+	"main.go/internal/download_clients"
 	"main.go/internal/file_func"
-	"main.go/internal/torrent_client"
 	"main.go/pkg/osutils"
 	"runtime"
 )
@@ -15,7 +15,7 @@ func info(bot *tgbotapi.BotAPI, id int64) {
 }
 
 func GetInfo() string {
-	folderData := torrent_client.GetPathTorrentContent()
+	folderData := download_clients.DefaultAllClients.GetPathContent()
 	textInfo := fmt.Sprintf("%s\nenv.PATH_TORRENT_CONTENT=%s ", osutils.InfoHost(), folderData)
 
 	size, err := file_func.FolderSize(folderData)

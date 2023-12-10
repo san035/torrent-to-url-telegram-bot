@@ -6,15 +6,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"main.go/internal/download_clients"
 	"main.go/internal/file_func"
-	"main.go/internal/torrent_client"
 	"time"
 )
 
 const SecondWaitGotInfo = 30
 
-func (torClient *TorrentAnacrolix) StartTorrent(ctx *context.Context, urlMagnet *string) (chanStatus *chan torrent_client.StatusTorrent, err error) {
-	ch := make(chan torrent_client.StatusTorrent, 2)
+func (torClient *TorrentAnacrolix) StartDownload(ctx *context.Context, urlMagnet *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
+	ch := make(chan download_clients.StatusTorrent, 2)
 	chanStatus = &ch
 
 	go torClient.Run(ctx, chanStatus, urlMagnet)
@@ -22,16 +22,16 @@ func (torClient *TorrentAnacrolix) StartTorrent(ctx *context.Context, urlMagnet 
 }
 
 // urlMagnet := "magnet:?xt=urn:btih:0EC1A755AEE37ACCD970D3C9662D93ABBCF26BE0&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann%3Fmagnet&dn=Хороший%20доктор%20%2F%20The%20Good%20Doctor%20%2F%20Сезон%3A%201%20%2F%20Серии%3A%201-18%20из%2018%20(Майкл%20Патрик%20Джэнн%2C%20Нестор%20Карбонелл%2C%20Джон%20Дал)%20%5B2017%2C%20США%2C%20драма%2C%20WEB-DLRip%5D%20MVO%20(Lo"
-func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan torrent_client.StatusTorrent, urlMagnet *string) {
+func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan download_clients.StatusTorrent, urlMagnet *string) {
 	defer close(*chanStatus)
-	statusTorrent := torrent_client.StatusTorrent{Info: "Begin download", Status: torrent_client.StatusTorrentStart}
+	statusTorrent := download_clients.StatusTorrent{Info: "Begin download", Status: download_clients.StatusTorrentStart}
 
 	*chanStatus <- statusTorrent
 
 	log.Info().Str("urlMagnet", *urlMagnet).Msg("Start torrent")
 	t, err := torClient.client.AddMagnet(*urlMagnet)
 	if err != nil {
-		*chanStatus <- torrent_client.StatusTorrent{Info: "Error: " + err.Error()}
+		*chanStatus <- download_clients.StatusTorrent{Info: "Error: " + err.Error()}
 		log.Error().Err(err).Str("urlMagnet", *urlMagnet).Msg("error AddMagnet")
 		return
 	}
@@ -50,18 +50,18 @@ func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan to
 
 	info := t.Info()
 
-	statusTorrent.WebFileName = torrent_client.GetWebFileName(&info.Name)
-	fullFileName := torrent_client.GetPathTorrentContent() + info.Name
+	statusTorrent.WebFileName = download_clients.GetWebFileName(&info.Name)
+	fullFileName := download_clients.DefaultAllClients.GetPathContent() + info.Name
 	if file_func.FileExists(&fullFileName) {
 		statusTorrent.Info = ""
-		statusTorrent.Status = torrent_client.StatusTorrentEnd
+		statusTorrent.Status = download_clients.StatusTorrentEnd
 		log.Info().Str(`file`, info.Name).Msg(statusTorrent.Info)
 		*chanStatus <- statusTorrent
 		return
 	}
 
 	statusTorrent.Info = fmt.Sprintf("Downloading ")
-	statusTorrent.Status = torrent_client.StatusTorrentRun
+	statusTorrent.Status = download_clients.StatusTorrentRun
 	*chanStatus <- statusTorrent
 
 	log.Info().Str(`file`, info.Name).Msg(`Start download`)
@@ -76,7 +76,7 @@ func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan to
 	} else {
 		statusTorrent.Info = "!not fully downloaded! " + megabytes + ` `
 	}
-	statusTorrent.Status = torrent_client.StatusTorrentEnd
+	statusTorrent.Status = download_clients.StatusTorrentEnd
 
 	*chanStatus <- statusTorrent
 	return

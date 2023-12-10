@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"main.go/internal/download_clients"
+	"main.go/internal/download_clients/torrent_anacrolix"
 	"main.go/internal/telegram"
-	"main.go/internal/torrent_client"
-	"main.go/internal/torrent_client/torrent_anacrolix"
-	"main.go/internal/torrent_client/torrent_mock"
 	"main.go/internal/web_server"
 	"main.go/pkg/config"
 	"main.go/pkg/osutils"
@@ -25,14 +24,8 @@ func main() {
 	listInitFunc := []InitPackage{
 		{"env", config.Init},
 		{"telegram", telegram.Init},
-		{"torrent_client", torrent_client.Init},
-	}
-
-	if runtime.GOOS == "windows" {
-		listInitFunc = append(listInitFunc, InitPackage{"torrent_mock", torrent_mock.Init})
-	} else {
-		listInitFunc = append(listInitFunc, InitPackage{"WebServer", web_server.Init})
-		listInitFunc = append(listInitFunc, InitPackage{"torrent_anacrolix", torrent_anacrolix.Init})
+		{"download_client", download_clients.Init},
+		{"WebServer", web_server.Init},
 	}
 
 	for _, initFunc := range listInitFunc {
@@ -42,9 +35,16 @@ func main() {
 			return
 		}
 	}
-	defer torrent_client.DefaultClient.Close()
+	defer download_clients.DefaultAllClients.Close()
 
-	log.Info().Str("PATH_TORRENT_CONTENT", torrent_client.GetPathTorrentContent()).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
+	// torrent client
+	Client1, err := torrent_anacrolix.New(download_clients.DefaultAllClients.PathContent)
+	if err != nil {
+		log.Fatal().Err(err).Msg("torrent_anacrolix.New")
+	}
+	download_clients.DefaultAllClients.AddClient(Client1)
+
+	log.Info().Str("PATH_TORRENT_CONTENT", download_clients.DefaultAllClients.GetPathContent()).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
 
 	telegram.SendMessageAdmin("Start bots \n" + telegram.GetInfo())
 

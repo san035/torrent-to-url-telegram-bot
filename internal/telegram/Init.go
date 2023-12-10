@@ -10,6 +10,13 @@ import (
 	"strings"
 )
 
+// Используемые имена env
+const (
+	ListAdminIdTelegram = "LIST_ADMIN_ID_TELEGRAM"
+	ListBotToken        = "LIST_BOT_TOKEN"
+	BotAbout            = "BOT_ABOUT"
+)
+
 type cmdTg struct {
 	IsAdmin     bool
 	Description string
@@ -58,9 +65,9 @@ func init() {
 		return
 	}
 
-	adminUsersList = SplitStringToInt64(os.Getenv("LIST_ADMIN_ID_TELEGRAM"))
+	adminUsersList = SplitStringToInt64(os.Getenv(ListAdminIdTelegram))
 
-	listToken := strings.Split(os.Getenv("LIST_BOT_TOKEN"), ",")
+	listToken := strings.Split(os.Getenv(ListBotToken), ",")
 	listBot = make([]*tgbotapi.BotAPI, 0, len(listToken))
 	listNameBot = make([]string, 0, len(listToken))
 	for i := 0; i < len(listToken); i++ {
@@ -74,11 +81,11 @@ func init() {
 		listNameBot = append(listNameBot, "@"+bot.Self.String())
 	}
 	if len(listBot) == 0 {
-		err = errors.New("Not work token in env:LIST_BOT_TOKEN")
+		err = errors.New("Not work token in env: " + ListBotToken)
 		return
 	}
 
-	textAbout = os.Getenv("BOT_ABOUT")
+	textAbout = os.Getenv(BotAbout)
 
 	MapCmd["create_cmd"] = cmdTg{IsAdmin: true, DoFunc: creatCmd, Description: "Создать список команд для @BotFather"}
 

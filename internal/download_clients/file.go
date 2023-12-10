@@ -1,4 +1,4 @@
-package torrent_client
+package download_clients
 
 import "strings"
 

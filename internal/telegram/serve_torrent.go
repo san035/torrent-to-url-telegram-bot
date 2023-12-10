@@ -4,7 +4,7 @@ import (
 	"context"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog/log"
-	"main.go/internal/torrent_client"
+	"main.go/internal/download_clients"
 	"main.go/internal/web_server"
 	"main.go/pkg/list_context"
 	"strconv"
@@ -15,7 +15,7 @@ var (
 	buttonDelete = `delete`
 )
 
-func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, magnetUrl *string) {
+func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, clientDownload download_clients.DownloadClient, magnetUrl *string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	ctx = context.WithValue(ctx, "cancel", cancel)
 
@@ -29,20 +29,20 @@ func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, magnetUrl *string) {
 
 	dataMsg := strconv.FormatUint(idContext, 10)
 	mapButton := map[int]*tgbotapi.InlineKeyboardMarkup{
-		torrent_client.StatusTorrentStart: GetInlineButton(&buttonCansel, &dataMsg),
-		torrent_client.StatusTorrentRun:   GetInlineButton(&buttonCansel, &dataMsg),
-		torrent_client.StatusTorrentPause: GetInlineButton(&buttonDelete, &dataMsg),
-		torrent_client.StatusTorrentEnd:   GetInlineButton(&buttonDelete, &dataMsg),
+		download_clients.StatusTorrentStart: GetInlineButton(&buttonCansel, &dataMsg),
+		download_clients.StatusTorrentRun:   GetInlineButton(&buttonCansel, &dataMsg),
+		download_clients.StatusTorrentPause: GetInlineButton(&buttonDelete, &dataMsg),
+		download_clients.StatusTorrentEnd:   GetInlineButton(&buttonDelete, &dataMsg),
 	}
 
-	chanStatus, err := torrent_client.DefaultClient.StartTorrent(&ctx, magnetUrl)
+	chanStatus, err := clientDownload.StartDownload(&ctx, magnetUrl)
 	if err != nil {
-		_, _ = Send(bot, chatId, err, mapButton[torrent_client.StatusTorrentEnd])
+		_, _ = Send(bot, chatId, err, mapButton[download_clients.StatusTorrentEnd])
 		cancel()
 		return
 	}
 
-	firstMessage, err := Send(bot, chatId, "Start", mapButton[torrent_client.StatusTorrentStart])
+	firstMessage, err := Send(bot, chatId, "Start", mapButton[download_clients.StatusTorrentStart])
 	if err != nil {
 		log.Err(err).Int64("chatId", chatId).Msg("Error bot.Send")
 		cancel()

@@ -1,10 +1,11 @@
 package telegram
 
 import (
+	"errors"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog/log"
-	"main.go/internal/torrent_client"
+	"main.go/internal/download_clients"
 	"main.go/pkg/list_context"
 	"strconv"
 )
@@ -58,15 +59,22 @@ func ListenerOneBot(bot *tgbotapi.BotAPI) {
 			continue
 		}
 
-		// в сообщении ссылка на торрент
-		err := torrent_client.CheckUrl(&update.Message.Text)
-		if err != nil {
+		// в сообщении ссылка на скачивание
+		var startWork bool
+		for _, client := range download_clients.DefaultAllClients.ListClient {
+			if client.GoodUrl(&update.Message.Text) {
+				startWork = true
+				go serveTorrent(bot, update.Message.Chat.ID, client, &update.Message.Text)
+				break
+			}
+		}
+
+		if !startWork {
+			err = errors.New(`the URL must start with "magnet:" `)
 			log.Error().Err(err).Int64("chatId", update.Message.Chat.ID).Msg(`bot.Send`)
 			_, _ = Send(bot, update.Message.Chat.ID, err, nil)
 			continue
 		}
-
-		go serveTorrent(bot, update.Message.Chat.ID, &update.Message.Text)
 
 	}
 
