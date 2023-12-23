@@ -3,8 +3,8 @@ Tелегрмам чат бот для конвертации magnet ссылк�
 
 [Github](https://github.com/san035/torrent-to-url-telegram-bot)
 
-[Команды]()
-![alt text](https://github.com/san035/torrent-to-url-telegram-bot/blob/develop/readme/ScreenshotCommands.png?raw=true)
+## screenshot
+![Telegram screenshot](images/ScreenShotCommands.png)
 
 ## .env
 ```
