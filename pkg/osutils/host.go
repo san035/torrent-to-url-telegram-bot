@@ -20,7 +20,7 @@ func GetMem() string {
 
 func InfoHost() string {
 	return "host: " +
-		*web_server.HostAndPort +
+		web_server.WebServiceDefault.GetRooturl() +
 		"\n" + GetFreeHDD() +
 		"\n" + GetMem() +
 		"\n Goroutines: " + strconv.Itoa(runtime.NumGoroutine())

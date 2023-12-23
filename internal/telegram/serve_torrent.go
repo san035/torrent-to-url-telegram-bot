@@ -54,7 +54,7 @@ func serveTorrent(bot *tgbotapi.BotAPI, chatId int64, clientDownload download_cl
 	for status := range *chanStatus {
 		textMsg = status.Info
 		if status.WebFileName != nil {
-			textMsg += web_server.GetUrl(status.WebFileName)
+			textMsg += web_server.WebServiceDefault.GetUrl(status.WebFileName)
 		}
 
 		log.Debug().Str("bot", bot.Self.String()).Str("user", NikNameById(chatId)).Str("text", textMsg).Msg("Сообщение от торрента")

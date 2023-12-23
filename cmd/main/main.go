@@ -53,7 +53,7 @@ func main() {
 }
 
 func funcEnd() {
-	totalText := "Close app host " + *web_server.HostAndPort
+	totalText := "Close app host " + web_server.WebServiceDefault.GetRooturl()
 	r := recover()
 	textRecover := fmt.Sprint("Recovered:", r)
 	if r != nil {

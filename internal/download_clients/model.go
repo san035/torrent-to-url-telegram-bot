@@ -2,8 +2,11 @@ package download_clients
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"path"
 	"path/filepath"
+	"slices"
 )
 
 type AllClients struct {
@@ -72,35 +75,36 @@ type StatusTorrent struct {
 	Status      int
 }
 
-func (downloadClient *AllClients) RemoveAllContents() error {
-	files, err := os.ReadDir(downloadClient.PathContent)
+func (downloadClient *AllClients) RemoveAllContents() (counDelete int, err error) {
+
+	// Открыть каталог
+	dir, err := os.Open(downloadClient.PathContent)
 	if err != nil {
-		return err
+		err = fmt.Errorf("Ошибка открытия каталога: %s", err)
+		return
+	}
+	defer dir.Close()
+
+	// Получить информацию о содержимом каталога
+	fileInfo, err := dir.Readdir(0) // 0 означает получить список всех файлов и папок
+	if err != nil {
+		err = fmt.Errorf("Ошибка чтения содержимого каталога: %s", err)
+		return
 	}
 
-	for _, file := range files {
-		filePath := filepath.Join(downloadClient.PathContent, file.Name())
-		err := os.Remove(filePath)
-		if err != nil {
-			return err
+	skipFiles := []string{".torrent.db", ".torrent.db-wal", ".torrent.db-shm"}
+	for _, file := range fileInfo {
+		if slices.Contains(skipFiles, path.Base(file.Name())) {
+			continue
 		}
+
+		filePath := filepath.Join(downloadClient.PathContent, file.Name())
+		err = os.Remove(filePath)
+		if err != nil {
+			return
+		}
+		counDelete++
 	}
 
-	return nil
+	return
 }
-
-//func GetListDownloadContent() (listContent []string, err error) {
-//	files, err := os.ReadDir(PathContent)
-//	if err != nil {
-//		return
-//	}
-//
-//	for _, file := range files {
-//		if file.IsDir() {
-//			listContent = append(listContent, file.Name())
-//		}
-//	}
-//
-//	return
-//
-//}

@@ -7,34 +7,47 @@ import (
 )
 
 const (
-	HostDefault = "8060"
-	PortDefault = "http://127.0.0.1"
+	HostDefault = "http://127.0.0.1"
+	PortDefault = "8060"
 )
 
-var HostAndPort *string = new(string)
+type HttpService struct {
+	port        string
+	hostAndPort string
+}
+
+var WebServiceDefault *HttpService
 
 func Init() error {
+	WebServiceDefault = NewHttpService(os.Getenv("HOST"), os.Getenv("PORT"))
+	go WebServiceDefault.Serve()
+	return nil
+}
 
-	port := os.Getenv("PORT")
+func NewHttpService(host, port string) *HttpService {
 	if port == "" {
-		port = PortDefault // default port
+		port = PortDefault
 	}
 
-	*HostAndPort = os.Getenv("HOST")
-	if *HostAndPort == "" {
-		*HostAndPort = HostDefault // default port
+	if host == "" {
+		host = HostDefault
 	}
-	*HostAndPort += `:` + port + `/`
 
+	webService := &HttpService{
+		port:        port,
+		hostAndPort: host + `:` + port + `/`,
+	}
+
+	return webService
+}
+
+func (webService *HttpService) Serve() {
 	http.HandleFunc(`/`, staticHandler)
 
-	log.Info().Str("port", port).Msg("Starting server")
-	go func() {
-		err := http.ListenAndServe(":"+port, nil)
-		if err != nil {
-			log.Fatal().Err(err).Str("port", port).Msg("ListenAndServe")
-		}
-	}()
+	log.Info().Str("HostAndPort", webService.GetRooturl()).Msg("Starting server")
+	err := http.ListenAndServe(`:`+webService.port, nil)
+	if err != nil {
+		log.Fatal().Err(err).Msg("ListenAndServe")
+	}
 
-	return nil
 }

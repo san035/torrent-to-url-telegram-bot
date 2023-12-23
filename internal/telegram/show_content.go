@@ -17,6 +17,6 @@ func showContent(bot *tgbotapi.BotAPI, id int64) {
 	//	textMsg += web_server.GetUrl(&fileName)
 	//}
 
-	_, _ = Send(bot, id, web_server.GetRooturl(), nil)
+	_, _ = Send(bot, id, web_server.WebServiceDefault.GetRooturl(), nil)
 	return
 }
