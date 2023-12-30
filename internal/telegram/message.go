@@ -3,7 +3,7 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/rs/zerolog/log"
+	"log/slog"
 )
 
 // Send, text - string or *string
@@ -23,7 +23,7 @@ func Send(Bot *tgbotapi.BotAPI, chatId int64, text interface{}, button *tgbotapi
 	mesConfig.BaseChat.ReplyMarkup = button
 	mes, err = Bot.Send(mesConfig)
 	if err != nil {
-		log.Error().Err(err).Int64("chatId", chatId).Msg(`telegram.Send`)
+		slog.Error(`telegram.Send`, "error", err, "chatId", chatId)
 		return
 	}
 	return
@@ -34,7 +34,7 @@ func (botsTelegram *BotsTelegram) SendMessageAdmin(text interface{}) {
 	for _, chatIdAdmin := range botsTelegram.adminUsersList {
 		_, err := Send(botsTelegram.listBot[0], chatIdAdmin, text, nil)
 		if err != nil {
-			log.Error().Err(err).Interface("text", text).Msg("telegram.SendMessageAdmin-")
+			slog.Error("telegram.SendMessageAdmin-", "error", err, "text", text)
 			break
 		}
 	}

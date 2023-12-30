@@ -3,7 +3,6 @@ package telegram
 import (
 	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/rs/zerolog/log"
 	"log/slog"
 	"main.go/pkg/list_context"
 	"os"
@@ -71,7 +70,7 @@ func New() (botsTelegram *BotsTelegram, err error) {
 	botsTelegram = &BotsTelegram{
 		listBot:        listBot,
 		listNameBot:    listNameBot,
-		adminUsersList: SplitStringToInt64(os.Getenv(ListAdminIdTelegram)),
+		adminUsersList: litStringToInt64(os.Getenv(ListAdminIdTelegram)),
 		textAbout:      os.Getenv(BotAbout),
 		//pathContent:    pathContent,
 		ListContext: list_context.NewListContext(),
@@ -85,13 +84,13 @@ func New() (botsTelegram *BotsTelegram, err error) {
 	return
 }
 
-func SplitStringToInt64(envList string) (adminUsersList []int64) {
+func litStringToInt64(envList string) (adminUsersList []int64) {
 	adminUsersListStr := strings.Split(envList, ",")
 	adminUsersList = make([]int64, 0, len(adminUsersListStr))
 	for _, id := range adminUsersListStr {
 		idAdmin, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {
-			log.Error().Err(err).Str("id", id).Msg("Load env LIST_ADMIN_ID_TELEGRAM-")
+			slog.Error("Load env LIST_ADMIN_ID_TELEGRAM-", "error", err, "id", id)
 			continue
 		}
 		adminUsersList = append(adminUsersList, idAdmin)

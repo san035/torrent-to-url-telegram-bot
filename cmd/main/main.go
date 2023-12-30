@@ -2,55 +2,46 @@ package main
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"log/slog"
+	"main.go/internal/config"
 	"main.go/internal/core"
 	"main.go/internal/download_clients"
 	"main.go/internal/download_clients/torrent_anacrolix"
 	"main.go/internal/telegram"
 	"main.go/internal/web_server"
-	"main.go/pkg/config"
 	"main.go/pkg/osutils"
 	"os"
 	"runtime"
 )
-
-type InitPackage struct {
-	Name     string
-	InitFunc func() error
-}
 
 func main() {
 	// Установка уровня логирования
 	setupLogger(slog.LevelInfo.String())
 	slog.Info("Start", "app", os.Args[0])
 
-	listInitFunc := []InitPackage{
-		{"env", config.Init},
-	}
-
-	for _, initFunc := range listInitFunc {
-		err := initFunc.InitFunc()
-		if err != nil {
-			log.Fatal().Err(err).Msg(initFunc.Name)
-			return
-		}
+	// Чтение конфиг
+	err := config.Load()
+	if err != nil {
+		slog.Error("config.Load", "error", err)
+		panic(1)
+		return
 	}
 
 	// Cозданние сущности всех клиенетов загрузки
 	allDownloadClient, err := download_clients.New()
 	if err != nil {
-		slog.Error("Init download_clients", "err", err)
+		slog.Error("Load download_clients", "err", err)
 	}
 	defer allDownloadClient.Close()
 
 	// Cоздание телеграм ботов
 	botsTG, err := telegram.New()
 	if err != nil {
-		slog.Error("Init telegram", "err", err)
+		slog.Error("Load telegram", "err", err)
 		panic(1)
 	}
 
+	// Настройка прерываения приложения
 	defer funcEnd(botsTG)
 	osutils.CallFuncByInterrupt(func() {
 		funcEnd(botsTG)
@@ -59,16 +50,18 @@ func main() {
 	// torrent client
 	Client1, err := torrent_anacrolix.New(allDownloadClient.PathContent)
 	if err != nil {
-		log.Fatal().Err(err).Msg("torrent_anacrolix.New")
+		slog.Error("torrent_anacrolix.New", "err", err)
+		panic(1)
 	}
 	allDownloadClient.AddClient(Client1)
 
+	// web сревис
 	webServer := web_server.New(allDownloadClient.GetPathContent())
 
+	// ядро
 	coreService := core.New(botsTG, allDownloadClient, webServer)
 
-	slog.Info("Start bots", "PATH_TORRENT_CONTENT", allDownloadClient.GetPathContent(), "Names bot", botsTG.GetListNameBot())
-
+	// Запуск работы ядра
 	coreService.Run()
 
 	slog.Info("End.")

@@ -1,7 +1,7 @@
 package web_server
 
 import (
-	"github.com/rs/zerolog/log"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -44,10 +44,9 @@ func New(pathContent string) *HttpService {
 func (webService *HttpService) Serve() {
 	http.HandleFunc(`/`, webService.staticHandler)
 
-	log.Info().Str("HostAndPort", webService.GetRooturl()).Msg("Starting server")
+	slog.Info("Starting server", "HostAndPort", webService.GetRooturl())
 	err := http.ListenAndServe(`:`+webService.port, nil)
 	if err != nil {
-		log.Fatal().Err(err).Msg("ListenAndServe")
+		slog.Error("ListenAndServe", "error", err)
 	}
-
 }
