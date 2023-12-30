@@ -5,8 +5,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func down(bot *tgbotapi.BotAPI, id int64) {
-	for _, b := range listBot {
+func (botsTelegram *BotsTelegram) down(bot *tgbotapi.BotAPI, id int64) {
+	for _, b := range botsTelegram.listBot {
 		u, err := b.GetMe()
 		if err != nil {
 			log.Fatal().Err(err).Msg("telegram.down-")

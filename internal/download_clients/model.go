@@ -2,14 +2,11 @@ package download_clients
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"path"
 	"path/filepath"
-	"slices"
 )
 
-type AllClients struct {
+type AllDownloadClient struct {
 	ListClient  []DownloadClient
 	PathContent string
 }
@@ -18,6 +15,7 @@ type DownloadClient interface {
 	StartDownload(ctx *context.Context, urlMagnet *string) (chanStatus *chan StatusTorrent, err error)
 	Close()
 	GoodUrl(url *string) bool
+	GetUrlPattern() (nameClient, pattern string)
 }
 
 const (
@@ -28,9 +26,7 @@ const (
 	CountDownloadClient = 2
 )
 
-var DefaultAllClients *AllClients
-
-func New() (downloadClient *AllClients, err error) {
+func New() (downloadClient *AllDownloadClient, err error) {
 	pathTorrentContent := os.Getenv("PATH_TORRENT_CONTENT")
 	if pathTorrentContent == `` {
 		pathTorrentContent = filepath.Dir(os.Args[0]) + `/TORRENT_CONTENT` + string(os.PathSeparator)
@@ -41,7 +37,7 @@ func New() (downloadClient *AllClients, err error) {
 		return
 	}
 
-	downloadClient = &AllClients{
+	downloadClient = &AllDownloadClient{
 		PathContent: pathTorrentContent,
 		ListClient:  make([]DownloadClient, 0, CountDownloadClient),
 	}
@@ -49,20 +45,15 @@ func New() (downloadClient *AllClients, err error) {
 	return
 }
 
-func Init() (err error) {
-	DefaultAllClients, err = New()
-	return
-}
-
-func (allDownloadClient *AllClients) AddClient(downloadClient DownloadClient) {
+func (allDownloadClient *AllDownloadClient) AddClient(downloadClient DownloadClient) {
 	allDownloadClient.ListClient = append(allDownloadClient.ListClient, downloadClient)
 }
 
-func (allDownloadClient *AllClients) GetPathContent() string {
+func (allDownloadClient *AllDownloadClient) GetPathContent() string {
 	return allDownloadClient.PathContent
 }
 
-func (allDownloadClient *AllClients) Close() {
+func (allDownloadClient *AllDownloadClient) Close() {
 	for _, client := range allDownloadClient.ListClient {
 		client.Close()
 	}
@@ -75,36 +66,12 @@ type StatusTorrent struct {
 	Status      int
 }
 
-func (downloadClient *AllClients) RemoveAllContents() (counDelete int, err error) {
-
-	// Открыть каталог
-	dir, err := os.Open(downloadClient.PathContent)
-	if err != nil {
-		err = fmt.Errorf("Ошибка открытия каталога: %s", err)
-		return
+// GetListSuppotUrlPattern получение словаяр поддерживаемых мосок url
+func (allDownloadClient *AllDownloadClient) GetListSuppotUrlPattern() (mapPattern map[string]string) {
+	mapPattern = map[string]string{}
+	for _, client := range allDownloadClient.ListClient {
+		nameClient, pattern := client.GetUrlPattern()
+		mapPattern[nameClient] = pattern
 	}
-	defer dir.Close()
-
-	// Получить информацию о содержимом каталога
-	fileInfo, err := dir.Readdir(0) // 0 означает получить список всех файлов и папок
-	if err != nil {
-		err = fmt.Errorf("Ошибка чтения содержимого каталога: %s", err)
-		return
-	}
-
-	skipFiles := []string{".torrent.db", ".torrent.db-wal", ".torrent.db-shm"}
-	for _, file := range fileInfo {
-		if slices.Contains(skipFiles, path.Base(file.Name())) {
-			continue
-		}
-
-		filePath := filepath.Join(downloadClient.PathContent, file.Name())
-		err = os.Remove(filePath)
-		if err != nil {
-			return
-		}
-		counDelete++
-	}
-
 	return
 }

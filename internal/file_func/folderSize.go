@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 )
 
-func FolderSize(folderPath string) (int64, error) {
+func FolderSize(folderPath *string) (int64, error) {
 	var size int64
 
-	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(*folderPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

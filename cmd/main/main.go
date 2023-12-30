@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"log/slog"
+	"main.go/internal/core"
 	"main.go/internal/download_clients"
 	"main.go/internal/download_clients/torrent_anacrolix"
 	"main.go/internal/telegram"
 	"main.go/internal/web_server"
 	"main.go/pkg/config"
 	"main.go/pkg/osutils"
+	"os"
 	"runtime"
 )
 
@@ -18,14 +21,12 @@ type InitPackage struct {
 }
 
 func main() {
-	defer funcEnd()
-	osutils.CallFuncByInterrupt(funcEnd)
+	// Установка уровня логирования
+	setupLogger(slog.LevelInfo.String())
+	slog.Info("Start", "app", os.Args[0])
 
 	listInitFunc := []InitPackage{
 		{"env", config.Init},
-		{"telegram", telegram.Init},
-		{"download_client", download_clients.Init},
-		{"WebServer", web_server.Init},
 	}
 
 	for _, initFunc := range listInitFunc {
@@ -35,25 +36,46 @@ func main() {
 			return
 		}
 	}
-	defer download_clients.DefaultAllClients.Close()
+
+	// Cозданние сущности всех клиенетов загрузки
+	allDownloadClient, err := download_clients.New()
+	if err != nil {
+		slog.Error("Init download_clients", "err", err)
+	}
+	defer allDownloadClient.Close()
+
+	// Cоздание телеграм ботов
+	botsTG, err := telegram.New()
+	if err != nil {
+		slog.Error("Init telegram", "err", err)
+		panic(1)
+	}
+
+	defer funcEnd(botsTG)
+	osutils.CallFuncByInterrupt(func() {
+		funcEnd(botsTG)
+	})
 
 	// torrent client
-	Client1, err := torrent_anacrolix.New(download_clients.DefaultAllClients.PathContent)
+	Client1, err := torrent_anacrolix.New(allDownloadClient.PathContent)
 	if err != nil {
 		log.Fatal().Err(err).Msg("torrent_anacrolix.New")
 	}
-	download_clients.DefaultAllClients.AddClient(Client1)
+	allDownloadClient.AddClient(Client1)
 
-	log.Info().Str("PATH_TORRENT_CONTENT", download_clients.DefaultAllClients.GetPathContent()).Interface("Names bot", telegram.GetListNameBot()).Msg("Start bots")
+	webServer := web_server.New(allDownloadClient.GetPathContent())
 
-	telegram.SendMessageAdmin("Start bots \n" + telegram.GetInfo())
+	coreService := core.New(botsTG, allDownloadClient, webServer)
 
-	telegram.Listener()
-	log.Info().Msg("End.")
+	slog.Info("Start bots", "PATH_TORRENT_CONTENT", allDownloadClient.GetPathContent(), "Names bot", botsTG.GetListNameBot())
+
+	coreService.Run()
+
+	slog.Info("End.")
 }
 
-func funcEnd() {
-	totalText := "Close app host " + web_server.WebServiceDefault.GetRooturl()
+func funcEnd(botsTelegram *telegram.BotsTelegram) {
+	totalText := "Close app"
 	r := recover()
 	textRecover := fmt.Sprint("Recovered:", r)
 	if r != nil {
@@ -64,6 +86,20 @@ func funcEnd() {
 			totalText += fmt.Sprintf("\n %s:%d", file, line)
 		}
 	}
-	log.Info().Str("recover", textRecover).Msg("Close app")
-	telegram.SendMessageAdmin(totalText)
+	slog.Info("Close app", "recover", totalText)
+	if botsTelegram != nil {
+		botsTelegram.SendMessageAdmin(totalText)
+	}
+}
+
+func setupLogger(logLevel string) {
+	var programLevel = new(slog.Level)
+	err := programLevel.UnmarshalText([]byte(logLevel))
+	if err != nil {
+		slog.Error("Error set log_level", "log_level", logLevel)
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: programLevel}))
+	slog.SetDefault(logger)
+	slog.Debug("", "log_level", logLevel)
 }

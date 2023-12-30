@@ -5,8 +5,8 @@ import (
 	"strconv"
 )
 
-func start(bot *tgbotapi.BotAPI, id int64) {
-	textAboutWithId := textAbout + "\n you id: " + strconv.FormatInt(id, 10)
+func (botsTelegram *BotsTelegram) start(bot *tgbotapi.BotAPI, id int64) {
+	textAboutWithId := botsTelegram.textAbout + "\n you id: " + strconv.FormatInt(id, 10)
 	_, _ = Send(bot, id, &textAboutWithId, nil)
 
 	return

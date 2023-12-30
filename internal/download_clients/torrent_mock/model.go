@@ -15,7 +15,7 @@ type TorrentMock struct {
 //	return
 //}
 
-func (torClient *TorrentMock) StartDownload(ctx *context.Context, urlMagnet *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
+func (torClient *TorrentMock) StartDownload(_ *context.Context, urlMagnet *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
 	log.Info().Str("urlMagnet", *urlMagnet).Msg("torrent_mock.StartDownload+")
 	return
 }
@@ -24,6 +24,10 @@ func (torClient *TorrentMock) Close() {
 	log.Info().Msg("torrent_mock.Close+")
 }
 
-func (torClient *TorrentMock) GoodUrl(url *string) bool {
+func (torClient *TorrentMock) GoodUrl(_ *string) bool {
 	return true
+}
+
+func (torClient *TorrentMock) GetUrlPattern() (nameClient, pattern string) {
+	return "mock", "*"
 }

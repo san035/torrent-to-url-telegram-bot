@@ -1,6 +1,6 @@
 //go:build windows
 
-package torrent_anacrolix
+package tmp
 
 import "errors"
 

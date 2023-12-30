@@ -13,23 +13,23 @@ import (
 
 const SecondWaitGotInfo = 30
 
-func (torClient *TorrentAnacrolix) StartDownload(ctx *context.Context, urlMagnet *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
+func (clientAnacrolix *TorrentAnacrolix) StartDownload(ctx *context.Context, urlMagnet *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
 	ch := make(chan download_clients.StatusTorrent, 2)
 	chanStatus = &ch
 
-	go torClient.Run(ctx, chanStatus, urlMagnet)
+	go clientAnacrolix.Run(ctx, chanStatus, urlMagnet)
 	return
 }
 
 // urlMagnet := "magnet:?xt=urn:btih:0EC1A755AEE37ACCD970D3C9662D93ABBCF26BE0&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann%3Fmagnet&dn=Хороший%20доктор%20%2F%20The%20Good%20Doctor%20%2F%20Сезон%3A%201%20%2F%20Серии%3A%201-18%20из%2018%20(Майкл%20Патрик%20Джэнн%2C%20Нестор%20Карбонелл%2C%20Джон%20Дал)%20%5B2017%2C%20США%2C%20драма%2C%20WEB-DLRip%5D%20MVO%20(Lo"
-func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan download_clients.StatusTorrent, urlMagnet *string) {
+func (clientAnacrolix *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan download_clients.StatusTorrent, urlMagnet *string) {
 	defer close(*chanStatus)
 	statusTorrent := download_clients.StatusTorrent{Info: "Begin download", Status: download_clients.StatusTorrentStart}
 
 	*chanStatus <- statusTorrent
 
 	log.Info().Str("urlMagnet", *urlMagnet).Msg("Start torrent")
-	t, err := torClient.client.AddMagnet(*urlMagnet)
+	t, err := clientAnacrolix.client.AddMagnet(*urlMagnet)
 	if err != nil {
 		*chanStatus <- download_clients.StatusTorrent{Info: "Error: " + err.Error()}
 		log.Error().Err(err).Str("urlMagnet", *urlMagnet).Msg("error AddMagnet")
@@ -51,7 +51,7 @@ func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan do
 	info := t.Info()
 
 	statusTorrent.WebFileName = download_clients.GetWebFileName(&info.Name)
-	fullFileName := download_clients.DefaultAllClients.GetPathContent() + info.Name
+	fullFileName := clientAnacrolix.pathTorrentContent + info.Name
 	if file_func.FileExists(&fullFileName) {
 		statusTorrent.Info = ""
 		statusTorrent.Status = download_clients.StatusTorrentEnd
@@ -67,7 +67,7 @@ func (torClient *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *chan do
 	log.Info().Str(`file`, info.Name).Msg(`Start download`)
 	t.DownloadAll()
 
-	rez := torClient.client.WaitAll()
+	rez := clientAnacrolix.client.WaitAll()
 	log.Info().Str(`file`, info.Name).Bool("Status", rez).Msg(`End Download`)
 
 	megabytes := fmt.Sprintf("%.1f Mb", float64(t.Length())/(1048576))

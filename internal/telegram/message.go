@@ -30,9 +30,9 @@ func Send(Bot *tgbotapi.BotAPI, chatId int64, text interface{}, button *tgbotapi
 }
 
 // SendMessageAdmin Отправка админам
-func SendMessageAdmin(text interface{}) {
-	for _, chatIdAdmin := range adminUsersList {
-		_, err := Send(listBot[0], chatIdAdmin, text, nil)
+func (botsTelegram *BotsTelegram) SendMessageAdmin(text interface{}) {
+	for _, chatIdAdmin := range botsTelegram.adminUsersList {
+		_, err := Send(botsTelegram.listBot[0], chatIdAdmin, text, nil)
 		if err != nil {
 			log.Error().Err(err).Interface("text", text).Msg("telegram.SendMessageAdmin-")
 			break

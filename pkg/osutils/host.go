@@ -2,7 +2,6 @@ package osutils
 
 import (
 	"fmt"
-	"main.go/internal/web_server"
 	"runtime"
 	"strconv"
 )
@@ -19,9 +18,9 @@ func GetMem() string {
 }
 
 func InfoHost() string {
-	return "host: " +
-		web_server.WebServiceDefault.GetRooturl() +
-		"\n" + GetFreeHDD() +
+	return "host: \n" +
+		GetFreeHDD() +
 		"\n" + GetMem() +
-		"\n Goroutines: " + strconv.Itoa(runtime.NumGoroutine())
+		"\n Goroutines: " +
+		strconv.Itoa(runtime.NumGoroutine())
 }
