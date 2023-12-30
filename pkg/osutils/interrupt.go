@@ -1,7 +1,7 @@
 package osutils
 
 import (
-	"github.com/rs/zerolog/log"
+	"log/slog"
 	"os"
 	"os/signal"
 )
@@ -12,7 +12,7 @@ func CallFuncByInterrupt(f func()) {
 	go func() {
 		<-c
 		f()
-		log.Error().Msg("User interrupt")
+		slog.Info("User interrupt")
 		os.Exit(0)
 	}()
 }

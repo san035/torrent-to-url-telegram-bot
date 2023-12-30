@@ -5,7 +5,7 @@ package torrent_anacrolix
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
+	"log/slog"
 	"main.go/internal/download_clients"
 	"main.go/internal/file_func"
 	"time"
@@ -28,11 +28,11 @@ func (clientAnacrolix *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *c
 
 	*chanStatus <- statusTorrent
 
-	log.Info().Str("urlMagnet", *urlMagnet).Msg("Start torrent")
+	slog.Info("Start torrent", "urlMagnet", *urlMagnet)
 	t, err := clientAnacrolix.client.AddMagnet(*urlMagnet)
 	if err != nil {
 		*chanStatus <- download_clients.StatusTorrent{Info: "Error: " + err.Error()}
-		log.Error().Err(err).Str("urlMagnet", *urlMagnet).Msg("error AddMagnet")
+		slog.Error("error AddMagnet", *urlMagnet, "error", err)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (clientAnacrolix *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *c
 	if file_func.FileExists(&fullFileName) {
 		statusTorrent.Info = ""
 		statusTorrent.Status = download_clients.StatusTorrentEnd
-		log.Info().Str(`file`, info.Name).Msg(statusTorrent.Info)
+		slog.Info(statusTorrent.Info, "file", info.Name)
 		*chanStatus <- statusTorrent
 		return
 	}
@@ -64,11 +64,11 @@ func (clientAnacrolix *TorrentAnacrolix) Run(ctx *context.Context, chanStatus *c
 	statusTorrent.Status = download_clients.StatusTorrentRun
 	*chanStatus <- statusTorrent
 
-	log.Info().Str(`file`, info.Name).Msg(`Start download`)
+	slog.Info(`Start download`, `file`, info.Name)
 	t.DownloadAll()
 
 	rez := clientAnacrolix.client.WaitAll()
-	log.Info().Str(`file`, info.Name).Bool("Status", rez).Msg(`End Download`)
+	slog.Info(`End Download`, `file`, info.Name, "Status", rez)
 
 	megabytes := fmt.Sprintf("%.1f Mb", float64(t.Length())/(1048576))
 	if rez {

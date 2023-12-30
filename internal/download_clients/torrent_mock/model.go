@@ -3,7 +3,6 @@ package torrent_mock
 
 import (
 	"context"
-	"github.com/rs/zerolog/log"
 	"main.go/internal/download_clients"
 )
 
@@ -15,13 +14,13 @@ type TorrentMock struct {
 //	return
 //}
 
-func (torClient *TorrentMock) StartDownload(_ *context.Context, urlMagnet *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
-	log.Info().Str("urlMagnet", *urlMagnet).Msg("torrent_mock.StartDownload+")
+func (torClient *TorrentMock) StartDownload(_ *context.Context, _ *string) (chanStatus *chan download_clients.StatusTorrent, err error) {
+	//log.Info().Str("urlMagnet", *urlMagnet).Msg("torrent_mock.StartDownload+")
 	return
 }
 
 func (torClient *TorrentMock) Close() {
-	log.Info().Msg("torrent_mock.Close+")
+	//log.Info().Msg("torrent_mock.Close+")
 }
 
 func (torClient *TorrentMock) GoodUrl(_ *string) bool {

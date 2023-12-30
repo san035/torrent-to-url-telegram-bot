@@ -3,7 +3,7 @@ package core
 import (
 	"context"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/rs/zerolog/log"
+	"log/slog"
 	"main.go/internal/download_clients"
 	"main.go/internal/telegram"
 	"main.go/pkg/list_context"
@@ -39,7 +39,7 @@ func (core *Core) serveTorrent(bot *tgbotapi.BotAPI, chatId int64, clientDownloa
 
 	firstMessage, err := telegram.Send(bot, chatId, "Start", mapButton[download_clients.StatusTorrentStart])
 	if err != nil {
-		log.Err(err).Int64("chatId", chatId).Msg("Error bot.Send")
+		slog.Error("bot.Send", "error", err, "chatId", chatId)
 		cancel()
 		return
 	}
@@ -52,12 +52,12 @@ func (core *Core) serveTorrent(bot *tgbotapi.BotAPI, chatId int64, clientDownloa
 			textMsg += core.webServer.GetUrl(status.WebFileName)
 		}
 
-		log.Debug().Str("bot", bot.Self.String()).Str("user", telegram.NikNameById(chatId)).Str("text", textMsg).Msg("Сообщение от торрента")
+		slog.Debug("Сообщение от торрента", "bot", bot.Self.String(), "user", telegram.NikNameById(chatId), "text", textMsg)
 
 		msg := tgbotapi.NewEditMessageText(chatId, firstMessage.MessageID, textMsg)
 		msg.BaseEdit.ReplyMarkup = mapButton[status.Status]
 		if _, err = bot.Send(msg); err != nil {
-			log.Err(err).Int64("chatId", chatId).Msg("Error bot.Send")
+			slog.Error("Error bot.Send", "error", err, "chatId", chatId)
 			cancel()
 			return
 		}

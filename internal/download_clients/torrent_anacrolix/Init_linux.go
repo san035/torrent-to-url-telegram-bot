@@ -4,7 +4,7 @@ package torrent_anacrolix
 
 import (
 	"github.com/anacrolix/torrent"
-	"github.com/rs/zerolog/log"
+	"log/slog"
 )
 
 type TorrentAnacrolix struct {
@@ -24,7 +24,7 @@ func New(pathTorrentContent string) (*TorrentAnacrolix, error) {
 		client:             client,
 		pathTorrentContent: pathTorrentContent,
 	}
-	log.Info().Str("path", pathTorrentContent).Msg("Start defaultClient torrent_anacrolix+")
+	slog.Info("Start defaultClient torrent_anacrolix+", "pathTorrentContent", pathTorrentContent)
 
 	return torrentAnacrolix, nil
 }
