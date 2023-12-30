@@ -1,9 +1,9 @@
 package web_server
 
-func GetUrl(fileName *string) string {
-	return *HostAndPort + *fileName
+func (webService *HttpService) GetUrl(fileName *string) string {
+	return webService.hostAndPort + *fileName
 }
 
-func GetRooturl() string {
-	return *HostAndPort
+func (webService *HttpService) GetRooturl() string {
+	return webService.hostAndPort
 }

@@ -3,28 +3,24 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/rs/zerolog/log"
-	"main.go/internal/torrent_client"
-	"main.go/pkg/list_context"
+	"log/slog"
+	"main.go/internal/download_clients"
+	"slices"
 	"strconv"
 )
 
-var (
-	listContext = list_context.NewListContext()
-)
-
 // Listener обработка входящих сообщений телеграмма
-func Listener() {
-	for i := 1; i < len(listBot); i++ {
-		go ListenerOneBot(listBot[i])
+func (botsTelegram *BotsTelegram) Listener(allDownloadClient *download_clients.AllDownloadClient) {
+	for i := 1; i < len(botsTelegram.listBot); i++ {
+		go botsTelegram.ListenerOneBot(botsTelegram.listBot[i])
 	}
 
-	ListenerOneBot(listBot[0])
+	botsTelegram.ListenerOneBot(botsTelegram.listBot[0])
 }
 
-func ListenerOneBot(bot *tgbotapi.BotAPI) {
+func (botsTelegram *BotsTelegram) ListenerOneBot(bot *tgbotapi.BotAPI) {
 
-	log.Info().Str("Name", bot.Self.String()).Msg("Start bot")
+	slog.Info("Start bot", "Name", bot.Self.String())
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := bot.GetUpdatesChan(u)
@@ -34,7 +30,7 @@ func ListenerOneBot(bot *tgbotapi.BotAPI) {
 		SaveUser(update.Message.Chat)
 
 		if update.CallbackQuery != nil {
-			runCallBack(bot, &update)
+			botsTelegram.runCallBack(bot, &update)
 			return
 		}
 
@@ -44,12 +40,12 @@ func ListenerOneBot(bot *tgbotapi.BotAPI) {
 		}
 
 		textCmd := update.Message.Command()
-		log.Info().Int("id", update.UpdateID).Msg("cmd:" + textCmd)
+		slog.Info("cmd:"+textCmd, "id", update.UpdateID)
 
-		cmd, ok := MapCmd[textCmd]
+		cmd, ok := botsTelegram.MapCmd[textCmd]
 		if ok {
 			// Проверка на админа
-			if cmd.IsAdmin && !contains(&adminUsersList, update.Message.Chat.ID) {
+			if cmd.IsAdmin && slices.Contains(botsTelegram.adminUsersList, update.Message.Chat.ID) {
 				_, _ = Send(bot, update.Message.Chat.ID, "You are not admin, "+strconv.FormatInt(update.Message.Chat.ID, 10), nil)
 				continue
 			}
@@ -58,25 +54,9 @@ func ListenerOneBot(bot *tgbotapi.BotAPI) {
 			continue
 		}
 
-		// в сообщении ссылка на торрент
-		err := torrent_client.CheckUrl(&update.Message.Text)
-		if err != nil {
-			log.Error().Err(err).Int64("chatId", update.Message.Chat.ID).Msg(`bot.Send`)
-			_, _ = Send(bot, update.Message.Chat.ID, err, nil)
-			continue
-		}
-
-		go serveTorrent(bot, update.Message.Chat.ID, &update.Message.Text)
+		// обработка сообщений по умолчанию
+		botsTelegram.DoFuncDefault(bot, update.Message.Chat.ID, &update.Message.Text)
 
 	}
-
-}
-
-func contains(arr *[]int64, num int64) bool {
-	for _, n := range *arr {
-		if n == num {
-			return true
-		}
-	}
-	return false
+	slog.Info("End bot", "Name", bot.Self.String())
 }

@@ -5,7 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func creatCmd(bot *tgbotapi.BotAPI, id int64) {
+func (botsTelegram *BotsTelegram) creatCmd(bot *tgbotapi.BotAPI, id int64) {
 
 	myOldCmd, err := bot.GetMyCommands()
 	if err != nil {
@@ -17,7 +17,7 @@ func creatCmd(bot *tgbotapi.BotAPI, id int64) {
 	}
 
 	var allNewCmd string
-	for cmdName, v := range MapCmd {
+	for cmdName, v := range botsTelegram.MapCmd {
 		if v.Description == "" {
 			v.Description = cmdName
 		}

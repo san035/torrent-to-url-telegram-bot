@@ -2,7 +2,7 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/rs/zerolog/log"
+	"log/slog"
 	"os"
 	"path"
 	"strconv"
@@ -11,21 +11,21 @@ import (
 )
 
 // runCallBack Обработка кнопок inline
-func runCallBack(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
+func (botsTelegram *BotsTelegram) runCallBack(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 	callbackDataStr := update.CallbackData()
 	callbackData := strings.Split(callbackDataStr, "_")
 	if len(callbackData) < 2 {
-		log.Error().Err(err).Str("callbackData", callbackDataStr).Str("textMsg", update.CallbackQuery.Message.Text).Msg("данные callBack не соответсвуют формату *_*")
+		slog.Error("данные callBack не соответсвуют формату *_*", "callbackData", callbackDataStr, "textMsg", update.CallbackQuery.Message.Text)
 		return
 	}
 
 	idContext, err := strconv.ParseUint(callbackData[1], 10, 64)
 	if err != nil {
-		log.Error().Err(err).Str("callbackData", callbackDataStr).Str("textMsg", update.CallbackQuery.Message.Text).Msg("Невозможно конверитровать id в callBack")
+		slog.Error("Невозможно конверитровать id в callBack", "error", err, "callbackData", callbackDataStr, "textMsg", update.CallbackQuery.Message.Text)
 	}
 
 	// завершаем контекст
-	dataContext := listContext.GetById(idContext)
+	dataContext := botsTelegram.ListContext.GetById(idContext)
 	if dataContext != nil {
 		select {
 		case <-(*dataContext.Context).Done():
@@ -44,7 +44,7 @@ func runCallBack(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 		}
 	}
 
-	if callbackData[0] != buttonDelete {
+	if callbackData[0] != ButtonDelete {
 		return
 	}
 
@@ -52,7 +52,7 @@ func runCallBack(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 	fileOrFolderName := path.Base(update.CallbackQuery.Message.Text)
 	err = os.Remove(fileOrFolderName)
 	if err != nil {
-		log.Error().Err(err).Str("file", fileOrFolderName).Msg("Ошибка удаления")
+		slog.Error("Ошибка удаления", "error", err, "file", fileOrFolderName)
 		return
 	}
 
@@ -60,7 +60,7 @@ func runCallBack(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
 	deleteMsg := tgbotapi.NewDeleteMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Message.MessageID)
 	_, err = bot.Send(deleteMsg)
 	if err != nil {
-		log.Error().Err(err).Str("text", update.CallbackQuery.Message.Text).Msg("Ошибка удаления сообщения")
+		slog.Error("Ошибка удаления сообщения", "error", err, "text", update.CallbackQuery.Message.Text)
 	}
 	return
 }

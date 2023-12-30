@@ -1,6 +1,10 @@
 # torrent-to-url-telegram-bot
-- [Gitlab](https://github.com/san035/torrent-to-url-telegram-bot)
+Tелегрмам чат бот для конвертации magnet ссылки в обычную ссылку
 
+[Github](https://github.com/san035/torrent-to-url-telegram-bot)
+
+## screenshot
+![Telegram screenshot](images/ScreenShotCommands.png)
 
 ## .env
 ```
